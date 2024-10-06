@@ -55,3 +55,28 @@ class Cart(models.Model):
 
     def __str__(self):
         return str(self.id)
+    
+
+class Billing(models.Model):
+    fristName=models.CharField(max_length=50,blank=True,null=True)
+    lastName=models.CharField(max_length=30,blank=True,null=True)
+    Email=models.EmailField(max_length=100,blank=True,null=True)
+    Phone=models.CharField(max_length=13,blank=True,null=True)
+    Address=models.CharField(max_length=200,blank=True,null=True)
+    city=models.CharField(max_length=200,blank=True,null=True)
+
+    @property
+    def fullname(self):
+        return f"{self.fristName} {self.lastName}".strip()
+    def __str__(self):
+        return self.fullname  # Call fullname without parentheses
+
+class Sales(models.Model):
+    user = models.ForeignKey(user, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    billing_address = models.ForeignKey(Billing, on_delete=models.CASCADE)
+    sale_date = models.DateTimeField(auto_now_add=True)  # Automatically set the date when the sale is created
+
+    def __str__(self):
+        return f"{self.quantity} x {self.product.title} sold to {self.user.UserName} on {self.sale_date}"

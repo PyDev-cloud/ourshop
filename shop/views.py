@@ -1,8 +1,10 @@
+from pyexpat.errors import messages
 from django.http.response import HttpResponse as HttpResponse
 from django.shortcuts import redirect, render
 from django.db.models.functions import Random
 from django.views.generic import *;
 from .models import *
+from .forms import *
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from django.http import JsonResponse
@@ -77,15 +79,6 @@ class Show_Cart(TemplateView):
         return render(request, "shop/Cart.html", {"cart": []})
         
 
-
-   
-    
-
-class Checkout(TemplateView):
-    template_name="shop/checkout.html"
-
-
-
     
 def plus(request):
         if request.method == "GET":
@@ -117,7 +110,8 @@ def plus(request):
 def Minus(request):
     prod_id=request.GET["prod_id"]
     c=Cart.objects.get(Q(product=prod_id)& Q(user=request.user))
-    c.quantity-=1
+    if c.quantity>1:
+        c.quantity-=1
     c.save()
     amount = 0
     shipping_amount = 100
@@ -155,7 +149,56 @@ def remove(request):
 
     return JsonResponse(data);
 
+
+
+
+
+
+   
     
+
+class Checkout(View):
+
+    def get(self, request, *args, **kwargs):
+        form = BillingAddressForm()
+        cart_items = Cart.objects.filter(user=request.user)  # Get all cart items
+        context = {
+            'form': form,
+            'cart_items': cart_items,
+        }
+        return render(request, 'shop/checkout.html', context)
     
-    
+    def post(self, request, *args, **kwargs):
+        form = BillingAddressForm(self.request.POST)
+        
+        if form.is_valid():
+            billing_address= form.save()
+            cart_items = Cart.objects.filter(user=request.user)  # Fetch cart items again
+
+            for item in cart_items:
+                # Create a sales record for each item in the cart
+                sales_record = Sales(
+                    user=request.user,
+                    product=item.product,
+                    quantity=item.quantity,
+                    billing_address=billing_address
+                )
+                sales_record.save()
+
+            # Optionally clear the cart after successful checkout
+            cart_items.delete()
+
+            messages.success(request, "Checkout successful!")
+            return redirect('success_url')  # Replace with your actual success URL
+        else:
+            messages.error(request, "Please correct the errors below.")
+
+        # If the form is invalid, re-render the checkout page with the current data
+        cart_items = Cart.objects.filter(user=request.user)
+        context = {
+            'form': form,
+            'cart_items': cart_items,
+        }
+
+        return render(request, 'shop/checkout.html', context)
     
