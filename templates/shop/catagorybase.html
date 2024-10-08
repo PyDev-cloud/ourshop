@@ -1,0 +1,48 @@
+{% extends "../index.html" %} {% load static %} {% block details %}
+
+<div class="container mt-5">
+  <h2>{% if category %}{{ category.name }}{% endif %}</h2>
+  <h4>{% if subcategory %}{{ subcategory.name }}{% endif %}</h4>
+
+  <div class="row">
+    {% if products %} {% for p in products %}
+    <div class="col-lg-4 col-md-6 col-sm-12 pb-1">
+          <div class="card product-item border-0 mb-4">
+            <div
+              class="card-header product-img position-relative overflow-hidden bg-transparent border p-0"
+            >
+              <img
+              class="img-fluid w-100"
+              src="{{p.image.url}}"
+              alt="{{p.title}}"
+            />
+            </div>
+            <div
+              class="card-body border-left border-right text-center p-0 pt-4 pb-3"
+            >
+              <h6 class="text-truncate mb-3">{{p.title}}</h6>
+              <div class="d-flex justify-content-center">
+                <h6>{{p.discount_price}}</h6>
+                <h6 class="text-muted ml-2"><del>{{p.discount_price}}</del></h6>
+              </div>
+            </div>
+            <div
+              class="card-footer d-flex justify-content-between bg-light border"
+            >
+              <a href="" class="btn btn-sm text-dark p-0"
+                ><i class="fas fa-eye text-primary mr-1"></i>View Detail</a
+              >
+              <a href="" class="btn btn-sm text-dark p-0"
+                ><i class="fas fa-shopping-cart text-primary mr-1"></i>Add To
+                Cart</a
+              >
+            </div>
+          </div>
+        </div>
+      {% endfor %} {% else %}
+      <p>No products available in this category or subcategory.</p>
+      {% endif %}
+    </div>
+  </div>
+  {% endblock details %}
+</div>

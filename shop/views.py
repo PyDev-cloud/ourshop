@@ -12,7 +12,8 @@ from django.http import JsonResponse
 
 class BaseContextMixin:
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = kwargs 
+        #context = super().get_context_data(**kwargs)
         context["Subcategory"] = Subcategory.objects.all()
         context["Categories"] = Category.objects.all()
         return context
@@ -31,13 +32,46 @@ class Home(BaseContextMixin,TemplateView):
         return context
     
 
+class CategoryView(BaseContextMixin,View):
+    def get(self, request, category_id=None, subcategory_id=None, *args, **kwargs):
+        # Fetch the category and subcategory based on IDs
+        category = get_object_or_404(Category, pk=category_id) if category_id else None
+        subcategory = get_object_or_404(Subcategory, pk=subcategory_id) if subcategory_id else None
+
+        # Start with all products
+        products = Product.objects.all()
+        
+
+        # Filter products by category if provided
+        if category:
+            products = products.filter(catagory_name=category)
+
+        # Filter products by subcategory if provided
+        if subcategory:
+            products = products.filter(subcategory=subcategory)
+
+        context =self.get_context_data (
+            category= category,
+            subcategory= subcategory,
+            products= products,
+        )
+        
+
+        return render(request, "shop/catagorybase.html", context)
+
+    
+
+
 class DetailsProduct(BaseContextMixin,DetailView):
     model=Product
     template_name="shop/ProductDetails.html"
     pk_url_kwarg="pk"
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["related_product"]=self.get_object().related
+        # Access the current product
+        product=self.get_object()
+        context["related_product"]=self.get_object().related # Assuming 'related' is a related manager
+        context["product"] = product  # Add product to context for template access
         return context
 
 
@@ -162,6 +196,7 @@ class Checkout(View):
     def get(self, request, *args, **kwargs):
         form = BillingAddressForm()
         cart_items = Cart.objects.filter(user=request.user)  # Get all cart items
+        
         context = {
             'form': form,
             'cart_items': cart_items,
@@ -201,4 +236,9 @@ class Checkout(View):
         }
 
         return render(request, 'shop/checkout.html', context)
-    
+
+
+
+
+class shop(TemplateView):
+    template_name="shop/shop.html"

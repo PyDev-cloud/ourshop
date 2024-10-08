@@ -107,12 +107,12 @@
                         <ul >
                             {% for c in Categories %}
                                 <li>
-                                    <a href="" class="nav-item nav-link" style="text-decoration=none;text-style=none;">{{ c.name }}</a>
+                                    <a href="{% url 'category' c.pk %}" class="nav-item nav-link" style="text-decoration=none;text-style=none;">{{ c.name }}</a>
                                     <ul>
                                         {% if c.subcategories.all %}
                                             {% for s in c.subcategories.all %}
                                                 <li>
-                                                    <a href="" class="dropdown-item">{{ s.name }}</a>
+                                                    <a href="{% url 'subcategory' c.id s.id %}" class="dropdown-item">{{ s.name }}</a>
                                                 </li>
                                             {% endfor %}
                                         {% else %}
@@ -140,7 +140,7 @@
                     <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
                         <div class="navbar-nav mr-auto py-0">
                             <a href="{% url "home" %}" class="nav-item nav-link active">Home</a>
-                            <a href="shop.html" class="nav-item nav-link">Shop</a>
+                            <a href="{% url "shop" %}" class="nav-item nav-link">Shop</a>
                             <a href="detail.html" class="nav-item nav-link">Shop Detail</a>
                             <div class="nav-item dropdown">
                                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Pages</a>
